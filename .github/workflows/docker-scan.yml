@@ -19,45 +19,47 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # - name: Generate Trivy vulnerability report
-      #   uses: aquasecurity/trivy-action@master
-      #   with:
-      #     scan-type: 'fs'
-      #     output: trivy-report.json
-      #     format: json
-      #     scan-ref: .
-      #     exit-code: 0
-
-      # - name: Upload vulnerability scan results
-      #   uses: actions/upload-artifact@v4
-      #   with:
-      #     name: trivy-report
-      #     path: trivy-report.json
-      #     retention-days: 30
-
       - name: Build images
         run: |
-          cd database && docker build -t localbuild/database:latest .
-          cd ../geoserver && docker build -t localbuild/geoserver:latest .
-          cd ../ogr2ogr && docker build -t localbuild/ogr2ogr:latest .
+          cd database && docker build -q -t localbuild/database:latest .
+          cd ../geoserver && docker build -q -t localbuild/geoserver:latest .
+          cd ../ogr2ogr && docker build -q -t localbuild/ogr2ogr:latest .
 
       - name: Scan database image
         uses: aquasecurity/trivy-action@0.28.0
         with:
-          image-ref: 'localbuild/database:latest'
+          image-ref: localbuild/database:latest
           # format: 'table'
-          format: 'json'
-          output: 'database-results.json'
-          exit-code: '0'
+          format: sarif
+          output: database-results.sarif
+          exit-code: 0
           ignore-unfixed: true
-          vuln-type: 'os,library'
-          severity: 'CRITICAL,HIGH'
+          vuln-type: os,library
+          severity: CRITICAL,HIGH
+
+      - name: Scan geoserver image
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          image-ref: localbuild/geoserver:latest
+          # format: 'table'
+          format: sarif
+          output: geoserver-results.sarif
+          exit-code: 0
+          ignore-unfixed: true
+          vuln-type: os,library
+          severity: CRITICAL,HIGH
+          skip-setup-trivy: true
 
       - name: Upload database vulnerability scan results
         uses: actions/upload-artifact@v4
         with:
-          name: database-results
-          path: database-results.json
+          name: scan-results
+          path: database-results.sarif
           retention-days: 30
 
-      
+      - name: Upload geoserver vulnerability scan results
+        uses: actions/upload-artifact@v4
+        with:
+          name: scan-results
+          path: geoserver-results.sarif
+          retention-days: 30
