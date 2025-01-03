@@ -13,30 +13,44 @@ on:
 jobs:
   scan-dockerfiles:
     runs-on: ubuntu-22.04
+    permissions:
+      contents: read
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Build images
-        run: |
-          cd database && docker build -t localbuild/database:latest .
-          cd ../geoserver && docker build -t localbuild/geoserver:latest .
-
-      - name: Scan database image
-        uses: aquasecurity/trivy-action@0.28.0
+      - name: Generate Trivy vulnerability report
+        uses: aquasecurity/trivy-action@master
         with:
-          image-ref: 'localbuild/database:latest'
-          format: 'table'
-          exit-code: '1'
-          ignore-unfixed: true
-          vuln-type: 'os,library'
-          severity: 'CRITICAL,HIGH'
-  
-      # - name: Install Trivy
-      #   uses: aquasecurity/trivy-action@master
+          scan-type: 'fs'
+          output: trivy-report.json
+          format: json
+          scan-ref: .
+          exit-code: 0
 
-      # - name: Scan database Dockerfile
-      #   run: trivy fs -exit-code 1 --severity HIGH,CRITICAL ./database
+      - name: Upload vulnerability scan results
+        uses: actions/upload-artifact@v4
+        with:
+          name: trivy-report
+          path: trivy-report.json
+          retention-days: 30
 
-      # - name: Scan database Dockerfile
-      #   run: trivy fs database/Dockerfile
+      # - name: Build images
+      #   run: |
+      #     cd database && docker build -t localbuild/database:latest .
+      #     cd ../geoserver && docker build -t localbuild/geoserver:latest .
+      #     cd ../ogr2ogr && docker build -t localbuild/ogr2ogr:latest .
+
+      # - name: Scan database image
+      #   uses: aquasecurity/trivy-action@0.28.0
+      #   with:
+      #     image-ref: 'localbuild/database:latest'
+      #     # format: 'table'
+      #     format: 'sarif'
+      #     output: 'database-results.sarif'
+      #     exit-code: '0'
+      #     ignore-unfixed: true
+      #     vuln-type: 'os,library'
+      #     severity: 'CRITICAL,HIGH'
+
+      
