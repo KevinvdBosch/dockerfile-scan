@@ -1,0 +1,24 @@
+name: Docker Security Scan
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  schedule:
+    - cron: '0 2 * * 1'
+
+jobs:
+  scan-dockerfiles:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+  
+      - name: Install Trivy
+        uses: aquasecurity/trivy-action@master
+
+      - name: Scan database Dockerfile
+        run: trivy fs nginx/Dockerfile
