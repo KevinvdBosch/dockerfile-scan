@@ -12,13 +12,31 @@ on:
 
 jobs:
   scan-dockerfiles:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
-  
-      - name: Install Trivy
-        uses: aquasecurity/trivy-action@master
+        uses: actions/checkout@v4
 
-      - name: Scan database Dockerfile
-        run: trivy fs database/Dockerfile
+      - name: Build images
+        run: |
+          cd database && docker build -t localbuild/database:latest .
+          cd ../geoserver && docker build -t localbuild/geoserver:latest .
+
+      - name: Scan database image
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          image-ref: 'localbuild/database:latest'
+          format: 'table'
+          exit-code: '1'
+          ignore-unfixed: true
+          vuln-type: 'os,library'
+          severity: 'CRITICAL,HIGH'
+  
+      # - name: Install Trivy
+      #   uses: aquasecurity/trivy-action@master
+
+      # - name: Scan database Dockerfile
+      #   run: trivy fs -exit-code 1 --severity HIGH,CRITICAL ./database
+
+      # - name: Scan database Dockerfile
+      #   run: trivy fs database/Dockerfile
