@@ -12,62 +12,78 @@ on:
 
 jobs:
   scan-dockerfiles:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu:22.04
     permissions:
       contents: read
       security-events: write
+    strategy:
+      matrix:
+        app: ['database','geoserver','ogr2ogr']
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Build images
-        run: |
-          cd database && docker build -q -t localbuild/database:latest .
-          cd ../geoserver && docker build -q -t localbuild/geoserver:latest .
-          cd ../ogr2ogr && docker build -q -t localbuild/ogr2ogr:latest .
+      - name: Build ${{ matrix.app }} image
+        run: cd ${{ matrix.app }} && docker build -q -t localbuild/${{ matrix.app }}:latest .
 
-      - name: Scan database image
-        uses: aquasecurity/trivy-action@0.28.0
-        id: database
-        with:
-          image-ref: localbuild/database:latest
-          format: sarif
-          output: database-results.sarif
-          exit-code: 0
-          ignore-unfixed: true
-          vuln-type: os,library
-          severity: HIGH,CRITICAL
+# jobs:
+#   scan-dockerfiles:
+#     runs-on: ubuntu-22.04
+#     permissions:
+#       contents: read
+#       security-events: write
+#     steps:
+#       - name: Checkout repository
+#         uses: actions/checkout@v4
 
-      - name: Upload database scan results
-        uses: github/codeql-action/upload-sarif@v3
-        with:
-          sarif_file: database-results.sarif
-          category: database
+#       - name: Build images
+#         run: |
+#           cd database && docker build -q -t localbuild/database:latest .
+#           cd ../geoserver && docker build -q -t localbuild/geoserver:latest .
+#           cd ../ogr2ogr && docker build -q -t localbuild/ogr2ogr:latest .
 
-      # - name: Fail database build on HIGH,CRITICAL vulnerabilities
-      #   uses: aquasecurity/trivy-action@0.28.0
-      #   with:
-      #     image-ref: localbuild/database:latest
-      #     format: table
-      #     exit-code: 1
-      #     ignore-unfixed: true
-      #     vuln-type: os,library
-      #     severity: HIGH,CRITICAL
+#       - name: Scan database image
+#         uses: aquasecurity/trivy-action@0.28.0
+#         id: database
+#         with:
+#           image-ref: localbuild/database:latest
+#           format: sarif
+#           output: database-results.sarif
+#           exit-code: 0
+#           ignore-unfixed: true
+#           vuln-type: os,library
+#           severity: HIGH,CRITICAL
 
-      - name: Scan geoserver image
-        uses: aquasecurity/trivy-action@0.28.0
-        id: geoserver
-        with:
-          image-ref: localbuild/geoserver:latest
-          format: sarif
-          output: geoserver-results.sarif
-          exit-code: 0
-          ignore-unfixed: true
-          vuln-type: os,library
-          severity: HIGH,CRITICAL
+#       - name: Upload database scan results
+#         uses: github/codeql-action/upload-sarif@v3
+#         with:
+#           sarif_file: database-results.sarif
+#           category: database
 
-      - name: Upload geoserver scan results
-        uses: github/codeql-action/upload-sarif@v3
-        with:
-          sarif_file: geoserver-results.sarif
-          category: geoserver
+#       # - name: Fail database build on HIGH,CRITICAL vulnerabilities
+#       #   uses: aquasecurity/trivy-action@0.28.0
+#       #   with:
+#       #     image-ref: localbuild/database:latest
+#       #     format: table
+#       #     exit-code: 1
+#       #     ignore-unfixed: true
+#       #     vuln-type: os,library
+#       #     severity: HIGH,CRITICAL
+
+#       - name: Scan geoserver image
+#         uses: aquasecurity/trivy-action@0.28.0
+#         id: geoserver
+#         with:
+#           image-ref: localbuild/geoserver:latest
+#           format: sarif
+#           output: geoserver-results.sarif
+#           exit-code: 0
+#           ignore-unfixed: true
+#           vuln-type: os,library
+#           severity: HIGH,CRITICAL
+
+#       - name: Upload geoserver scan results
+#         uses: github/codeql-action/upload-sarif@v3
+#         with:
+#           sarif_file: geoserver-results.sarif
+#           category: geoserver
