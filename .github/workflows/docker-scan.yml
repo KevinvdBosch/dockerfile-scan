@@ -21,4 +21,4 @@ jobs:
         uses: aquasecurity/trivy-action@master
 
       - name: Scan database Dockerfile
-        run: trivy fs nginx/Dockerfile
+        run: trivy fs database/Dockerfile
