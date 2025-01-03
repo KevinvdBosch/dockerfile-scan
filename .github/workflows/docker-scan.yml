@@ -11,11 +11,12 @@ on:
     - cron: '0 2 * * 1'
 
 jobs:
+  analyze:
+    
   scan-dockerfiles:
     runs-on: ubuntu-22.04
     permissions:
       contents: read
-      actions: read
       security-events: write
     steps:
       - name: Checkout repository
@@ -29,19 +30,20 @@ jobs:
 
       - name: Scan database image
         uses: aquasecurity/trivy-action@0.28.0
+        id: database
         with:
           image-ref: localbuild/database:latest
           format: sarif
-          output: database-results.sarif
+          output: scan-results.sarif
           exit-code: 0
           ignore-unfixed: true
           vuln-type: os,library
           severity: HIGH,CRITICAL
 
-      - name: Upload database scan results
-        uses: github/codeql-action/upload-sarif@v3
-        with:
-          sarif_file: database-results.sarif
+      # - name: Upload database scan results
+      #   uses: github/codeql-action/upload-sarif@v3
+      #   with:
+      #     sarif_file: database-results.sarif
 
       # - name: Fail database build on HIGH,CRITICAL vulnerabilities
       #   uses: aquasecurity/trivy-action@0.28.0
@@ -55,10 +57,11 @@ jobs:
 
       - name: Scan geoserver image
         uses: aquasecurity/trivy-action@0.28.0
+        id: geoserver
         with:
           image-ref: localbuild/geoserver:latest
           format: sarif
-          output: geoserver-results.sarif
+          output: scan-results.sarif
           exit-code: 0
           ignore-unfixed: true
           vuln-type: os,library
@@ -67,4 +70,4 @@ jobs:
       - name: Upload geoserver scan results
         uses: github/codeql-action/upload-sarif@v3
         with:
-          sarif_file: geoserver-results.sarif
+          sarif_file: scan-results.sarif
