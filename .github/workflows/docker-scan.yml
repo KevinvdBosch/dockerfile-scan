@@ -17,6 +17,7 @@ jobs:
       contents: read
       actions: read
       security-events: read
+      checks: write
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
