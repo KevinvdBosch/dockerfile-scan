@@ -16,7 +16,7 @@ jobs:
     permissions:
       contents: write
       actions: write
-      # security-events: write
+      security-events: write
       checks: write
     steps:
       - name: Checkout repository
