@@ -14,10 +14,10 @@ jobs:
   scan-dockerfiles:
     runs-on: ubuntu-22.04
     permissions:
-      contents: write
-      actions: write
-      security-events: write
-      checks: write
+      contents: read
+      actions: read
+      # security-events: write
+      # checks: write
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
