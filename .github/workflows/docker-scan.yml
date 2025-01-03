@@ -26,17 +26,17 @@ jobs:
           cd ../geoserver && docker build -q -t localbuild/geoserver:latest .
           cd ../ogr2ogr && docker build -q -t localbuild/ogr2ogr:latest .
 
-      - name: Scan database image
-        uses: aquasecurity/trivy-action@0.28.0
-        id: database
-        with:
-          image-ref: localbuild/database:latest
-          format: sarif
-          output: scan-results.sarif
-          exit-code: 0
-          ignore-unfixed: true
-          vuln-type: os,library
-          severity: HIGH,CRITICAL
+      # - name: Scan database image
+      #   uses: aquasecurity/trivy-action@0.28.0
+      #   id: database
+      #   with:
+      #     image-ref: localbuild/database:latest
+      #     format: sarif
+      #     output: scan-results.sarif
+      #     exit-code: 0
+      #     ignore-unfixed: true
+      #     vuln-type: os,library
+      #     severity: HIGH,CRITICAL
 
       # - name: Upload database scan results
       #   uses: github/codeql-action/upload-sarif@v3
