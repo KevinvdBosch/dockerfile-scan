@@ -1,0 +1,14 @@
+version: 2
+updates:
+  - package-ecosystem: docker
+    directory: /database
+    schedule:
+      interval: weekly
+  - package-ecosystem: docker
+    directory: /geoserver
+    schedule:
+      interval: weekly
+  - package-ecosystem: docker
+    directory: /ogr2ogr
+    schedule:
+      interval: weekly
