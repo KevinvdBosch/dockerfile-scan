@@ -26,6 +26,24 @@ jobs:
       - name: Build ${{ matrix.app }} image
         run: cd ${{ matrix.app }} && docker build -q -t localbuild/${{ matrix.app }}:latest .
 
+      - name: Scan ${{ matrix.app }} image
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          image-ref: localbuild/${{ matrix.app }}:latest
+          format: sarif
+          output: ${{ matrix.app }}-results.sarif
+          exit-code: 0
+          ignore-unfixed: true
+          vuln-type: os,library
+          severity: HIGH,CRITICAL
+
+      - name: Upload ${{ matrix.app }} scan results
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: ${{ matrix.app }}-results.sarif
+          category: ${{ matrix.app }}
+          
+
 # jobs:
 #   scan-dockerfiles:
 #     runs-on: ubuntu-22.04
