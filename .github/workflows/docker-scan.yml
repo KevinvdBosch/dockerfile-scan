@@ -15,6 +15,7 @@ jobs:
     runs-on: ubuntu-22.04
     permissions:
       contents: read
+      actions: read
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -22,8 +23,6 @@ jobs:
       - name: Build images
         run: |
           cd database && docker build -q -t localbuild/database:latest .
-          cd ../geoserver && docker build -q -t localbuild/geoserver:latest .
-          cd ../ogr2ogr && docker build -q -t localbuild/ogr2ogr:latest .
 
       - name: Scan database image
         uses: aquasecurity/trivy-action@0.28.0
